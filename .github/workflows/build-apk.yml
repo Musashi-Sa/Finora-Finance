@@ -1,5 +1,3 @@
-
-
 name: Build Finora APK
 
 on:
@@ -44,7 +42,11 @@ jobs:
           gradle-version: '8.9'
 
       - name: Build Debug APK
-        run: gradle -p "$PROJECT_DIR" :app:assembleDebug --stacktrace
+        run: |
+          gradle -p "$PROJECT_DIR" :app:assembleDebug > build.log 2>&1 || true
+          grep -n -C 8 "What went wrong:" build.log || true
+          grep -n -C 5 "Caused by:" build.log | head -n 35 || true
+          grep -q "BUILD FAILED" build.log && exit 1 || exit 0
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
